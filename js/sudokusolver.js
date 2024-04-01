@@ -59,7 +59,7 @@ function loadForm(sval) {
 	for(var r=0;r<9;r++) {
 		for(var c=0;c<9;c++) {
 			var idx = r.toString()+"_"+c.toString();
-			var v = document.getElementById(idx).value;
+			var v = document.getElementById(idx).textContent; //elm is span
 			if (v!='1' && v!='2' && v!='3' && v!='4' && v!='5' && v!='6' && v!='7' && v!='8' && v!='9') v = '';
 			if (v!='') sval = setCell(sval,r,c,v);
 		}
@@ -67,54 +67,9 @@ function loadForm(sval) {
 	return sval;
 }
 
-function loadTestData1(sval) {
-	sval = setCell(sval,0,0,'1');
-	sval = setCell(sval,0,1,'2');
-	sval = setCell(sval,0,2,'3');
-	sval = setCell(sval,1,0,'4');
-	sval = setCell(sval,1,1,'5');
-	sval = setCell(sval,1,2,'6');
-	sval = setCell(sval,2,0,'7');
-	sval = setCell(sval,2,1,'8');
-	sval = setCell(sval,2,2,'9');
-	
-	sval = setCell(sval,3,3,'1');
-	sval = setCell(sval,3,4,'2');
-	sval = setCell(sval,3,5,'3');
-	sval = setCell(sval,4,3,'4');
-	sval = setCell(sval,4,4,'5');
-	sval = setCell(sval,4,5,'6');
-	sval = setCell(sval,5,3,'7');
-	sval = setCell(sval,5,4,'8');
-	sval = setCell(sval,5,5,'9');
-	return sval;
-}
-
-function loadTestData2(sval) {
-	sval = setCell(sval,0,0,'1');
-	sval = setCell(sval,0,1,'2');
-	sval = setCell(sval,0,2,'3');
-	sval = setCell(sval,0,3,'4');
-	sval = setCell(sval,0,4,'5');
-	sval = setCell(sval,0,5,'6');
-	sval = setCell(sval,0,6,'7');
-	sval = setCell(sval,0,7,'8');
-	
-	sval = setCell(sval,3,0,'2');
-	sval = setCell(sval,3,1,'3');
-	sval = setCell(sval,3,2,'4');
-	sval = setCell(sval,3,3,'5');
-	sval = setCell(sval,3,4,'6');
-	sval = setCell(sval,3,5,'7');
-	sval = setCell(sval,3,6,'8');
-	sval = setCell(sval,3,7,'1');
-	return sval;
-}
-
 function initState() {
 	var sval = emptyState();
 	sval = loadForm(sval);
-	//sval = loadTestData1(sval);
 	return sval;
 }
 
@@ -135,32 +90,6 @@ function checkTerminalState(s) {
 	return {isTerminal: ret, value:  v};
 }
 
-function showResult(r) {
-	function showState(s) {
-		var t = '<table>';
-		for(var r=0;r<9;r++) {
-			t += '<tr>';
-			for(var c=0;c<9;c++) {
-				t += '<td>'+s[r][c].toString()+'</td>';
-			}
-			t += '</tr>';
-		}
-		t += '</table>';
-		return t;
-	}
-	
-	var sudt = document.getElementById("test");
-	var m;
-	if (r.isTerminal===true) {
-		m = 'Reseni:<br />'+showState(r.state);
-	} else if(r.isTerminal===null) {
-		m = 'Nelze vyresit';
-	} else {
-		 m = 'Nedokonceno:<br />'+showState(r.state);
-	}
-	sudt.innerHTML = m;
-}
-
 function solve(s) {
 	var t = checkTerminalState(s);
 	if (t.isTerminal===false) {
@@ -178,8 +107,53 @@ function solve(s) {
 	return {isTerminal: t.isTerminal, state: s}
 }
 
-function Solver() {
+function Solver(elId) {
 	var sval = initState();
 	var ret = solve(sval);
-	showResult(ret);
+	generate(elId, ret, sval)
+}
+
+function EraseAll(elId) {
+	generate(elId)
+}
+
+function addMod(t) {
+	var v = parseInt(t.textContent); //it is span
+	if (v==undefined || v==null|| isNaN(v)) v = 0;
+	v = (1 + v)%10;
+	t.textContent = v==0?'\u00A0':v.toString(); //0 is nbsp
+}
+
+function generate(elId="sudoku", result, originalstate) {
+	function showState(state, original) {
+		o = "<table>";
+		for (let r=0;r<9;r++) {
+			o += "<tr>";
+			for (let c=0;c<9;c++) {
+				cell_bg = (((~~(r/3))+(~~(c/3)))%2)==1?"dark":"";
+				v = (state!=undefined && state[r][c].length==1)?state[r][c].toString():'\u00A0';
+				cell_color = (state!=undefined && original!=undefined && state[r][c].length==1 && original[r][c].length!=1 && state[r][c]!=original[r][c])?"solution":"";
+
+				o += `<td><span id=\"${r.toString()}_${c.toString()}\" class=\"cell ${cell_bg} ${cell_color}\" onclick=\"addMod(this)\">${v}</span></td>`;
+			}
+			o += "</tr>";
+		}
+		o += "</table>";
+		return o;
+	}
+	if (result!=undefined) {
+		if (result.isTerminal===true) {
+			o = 'Solution :<br />'+showState(result.state, originalstate);
+		} else if(result.isTerminal===null) {
+			o = 'No solution'+showState(originalstate);
+		} else {
+			o = 'Not finished:<br />'+showState(result.state, originalstate);
+		}
+	} else {
+		o = showState();
+	}
+
+	var sudt = document.getElementById(elId);
+	sudt.innerHTML = o;
+	//return o;
 }
