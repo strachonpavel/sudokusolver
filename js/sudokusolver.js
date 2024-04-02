@@ -1,6 +1,6 @@
 
 
-function emptyState() {
+function emptySolutionState() {
 	var sval = [];
 	for(var r=0;r<9;r++) {
 		var rval = [];
@@ -55,11 +55,24 @@ function setCell(so,r,c,v) {
 	return s;
 }
 
-function loadForm(sval) {
+function getCurrState() {
+	s = [];
 	for(var r=0;r<9;r++) {
+		s[r] = [];
 		for(var c=0;c<9;c++) {
 			var idx = r.toString()+"_"+c.toString();
 			var v = document.getElementById(idx).textContent; //elm is span
+			if (v!='1' && v!='2' && v!='3' && v!='4' && v!='5' && v!='6' && v!='7' && v!='8' && v!='9') v = '';
+			s[r][c] = v;
+		}
+	}
+	return s;
+}
+
+function getSolutionState(sval, currState) {
+	for(var r=0;r<9;r++) {
+		for(var c=0;c<9;c++) {
+			var v = currState[r][c];
 			if (v!='1' && v!='2' && v!='3' && v!='4' && v!='5' && v!='6' && v!='7' && v!='8' && v!='9') v = '';
 			if (v!='') sval = setCell(sval,r,c,v);
 		}
@@ -67,9 +80,9 @@ function loadForm(sval) {
 	return sval;
 }
 
-function initState() {
-	var sval = emptyState();
-	sval = loadForm(sval);
+function initSolutionState(currState) {
+	var sval = emptySolutionState();
+	sval = getSolutionState(sval, currState);
 	return sval;
 }
 
@@ -108,13 +121,14 @@ function solve(s) {
 }
 
 function Solver(elId) {
-	var sval = initState();
+	var currState = getCurrState();
+	var sval = initSolutionState(currState);
 	var ret = solve(sval);
-	generate(elId, ret, sval)
+	generate(elId, ret, currState);
 }
 
 function EraseAll(elId) {
-	generate(elId)
+	generate(elId);
 }
 
 function addMod(t) {
@@ -123,6 +137,8 @@ function addMod(t) {
 	v = (1 + v)%10;
 	t.textContent = v==0?'\u00A0':v.toString(); //0 is nbsp
 }
+
+
 
 function generate(elId="sudoku", result, originalstate) {
 	function showState(state, original) {
@@ -156,4 +172,98 @@ function generate(elId="sudoku", result, originalstate) {
 	var sudt = document.getElementById(elId);
 	sudt.innerHTML = o;
 	//return o;
+}
+
+function Load(elId) {
+	generate(elId);
+	//testState1();
+	loadFromDisk();
+}
+
+function Save(elId) {
+	//var contentType = 'text/plain';
+	var contentType = 'application/json';
+	var filename = 'sudoku.json';
+	var content = new Blob([JSON.stringify(getCurrState())], {type: contentType});
+	if (window.navigator.msSaveOrOpenBlob) // IE10+
+		window.navigator.msSaveOrOpenBlob(content, filename);
+	else { // Others
+		var a = document.createElement("a"), url = URL.createObjectURL(content);
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function() {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);  
+		}, 0); 
+	}
+}
+
+function loadFromDisk() {
+	console.log("aa");
+	var files = document.getElementById('loadDiskFile').files;
+	if (files.length <= 0) return false;
+	var fr = new FileReader();
+	fr.onload = function(e) { 
+		if (e.target.result) {
+			try {
+				
+				var d = JSON.parse(e.target.result);
+				for (let r=0;r<9;r++) {
+					for (let c=0;c<9;c++) {
+						var idx = r.toString()+"_"+c.toString();
+						document.getElementById(idx).textContent = d[r][c];
+					}
+				}
+			} catch(er) {
+				showMessage('Error')
+			}
+		}
+	}
+	fr.readAsText(files.item(0));
+
+}
+
+
+
+function testState1() {
+	document.getElementById("0_1").textContent = "6";
+	document.getElementById("0_5").textContent = "5";
+	document.getElementById("0_6").textContent = "8";
+	document.getElementById("0_8").textContent = "4";
+
+	document.getElementById("1_0").textContent = "2";
+	document.getElementById("1_1").textContent = "7";
+	document.getElementById("1_3").textContent = "6";
+	document.getElementById("1_4").textContent = "9";
+
+	document.getElementById("2_1").textContent = "4";
+	document.getElementById("2_3").textContent = "8";
+
+	document.getElementById("3_6").textContent = "5";
+	document.getElementById("3_8").textContent = "8";
+
+	document.getElementById("4_1").textContent = "5";
+	document.getElementById("4_2").textContent = "6";
+	document.getElementById("4_4").textContent = "4";
+	document.getElementById("4_6").textContent = "3";
+	document.getElementById("4_7").textContent = "1";
+
+	document.getElementById("5_0").textContent = "8";
+	document.getElementById("5_2").textContent = "9";
+
+	document.getElementById("6_5").textContent = "6";
+	document.getElementById("6_7").textContent = "5";
+
+	document.getElementById("7_4").textContent = "3";
+	document.getElementById("7_5").textContent = "9";
+	document.getElementById("7_7").textContent = "8";
+	document.getElementById("7_8").textContent = "7";
+
+	document.getElementById("8_0").textContent = "6";
+	document.getElementById("8_2").textContent = "1";
+	document.getElementById("8_3").textContent = "5";
+	document.getElementById("8_7").textContent = "2";
+
 }

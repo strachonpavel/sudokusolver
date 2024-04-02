@@ -27,7 +27,12 @@
 		<div id="sudoku"></div>
 		<br/>
 		<input type="button" value="Solve" onclick="Solver('sudoku');" />
+		<br/>
 		<input type="button" value="Erase All" onclick="EraseAll('sudoku');" />
+		<br/>
+		<input type="button" value="Save" onclick="Save('sudoku');" />
+		<input type="button" value="Load" onclick="Load('sudoku');" />
+		<input type="file" id="loadDiskFile" name="loadDiskFile" tooltip="Choose the file from disk" value="sudoku.json">
 		
 	</body>
 	<script>
