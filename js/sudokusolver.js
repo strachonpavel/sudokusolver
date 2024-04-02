@@ -157,16 +157,17 @@ function generate(elId="sudoku", result, originalstate) {
 		o += "</table>";
 		return o;
 	}
+	o = "<div><span>SUDOKU</span>";
 	if (result!=undefined) {
 		if (result.isTerminal===true) {
-			o = 'Solution :<br />'+showState(result.state, originalstate);
+			o += '<span> - Solution</span></div>'+showState(result.state, originalstate);
 		} else if(result.isTerminal===null) {
-			o = 'No solution'+showState(originalstate);
+			o += '<span> - No solution</span></div>'+showState(originalstate);
 		} else {
-			o = 'Not finished:<br />'+showState(result.state, originalstate);
+			o += '<span> - Not finished</span></div>'+showState(result.state, originalstate);
 		}
 	} else {
-		o = showState();
+		o += '</div>'+showState();
 	}
 
 	var sudt = document.getElementById(elId);
@@ -176,7 +177,6 @@ function generate(elId="sudoku", result, originalstate) {
 
 function Load(elId) {
 	generate(elId);
-	//testState1();
 	loadFromDisk();
 }
 
@@ -201,7 +201,6 @@ function Save(elId) {
 }
 
 function loadFromDisk() {
-	console.log("aa");
 	var files = document.getElementById('loadDiskFile').files;
 	if (files.length <= 0) return false;
 	var fr = new FileReader();
@@ -217,53 +216,10 @@ function loadFromDisk() {
 					}
 				}
 			} catch(er) {
-				showMessage('Error')
+				console.log('Error')
 			}
 		}
 	}
 	fr.readAsText(files.item(0));
-
-}
-
-
-
-function testState1() {
-	document.getElementById("0_1").textContent = "6";
-	document.getElementById("0_5").textContent = "5";
-	document.getElementById("0_6").textContent = "8";
-	document.getElementById("0_8").textContent = "4";
-
-	document.getElementById("1_0").textContent = "2";
-	document.getElementById("1_1").textContent = "7";
-	document.getElementById("1_3").textContent = "6";
-	document.getElementById("1_4").textContent = "9";
-
-	document.getElementById("2_1").textContent = "4";
-	document.getElementById("2_3").textContent = "8";
-
-	document.getElementById("3_6").textContent = "5";
-	document.getElementById("3_8").textContent = "8";
-
-	document.getElementById("4_1").textContent = "5";
-	document.getElementById("4_2").textContent = "6";
-	document.getElementById("4_4").textContent = "4";
-	document.getElementById("4_6").textContent = "3";
-	document.getElementById("4_7").textContent = "1";
-
-	document.getElementById("5_0").textContent = "8";
-	document.getElementById("5_2").textContent = "9";
-
-	document.getElementById("6_5").textContent = "6";
-	document.getElementById("6_7").textContent = "5";
-
-	document.getElementById("7_4").textContent = "3";
-	document.getElementById("7_5").textContent = "9";
-	document.getElementById("7_7").textContent = "8";
-	document.getElementById("7_8").textContent = "7";
-
-	document.getElementById("8_0").textContent = "6";
-	document.getElementById("8_2").textContent = "1";
-	document.getElementById("8_3").textContent = "5";
-	document.getElementById("8_7").textContent = "2";
 
 }
